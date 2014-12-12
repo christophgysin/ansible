@@ -159,6 +159,7 @@ class Runner(object):
         no_log=False,                       # option to enable/disable logging for a given task
         run_once=False,                     # option to enable/disable host bypass loop for a given task
         sudo_exe=C.DEFAULT_SUDO_EXE,        # ex: /usr/local/bin/sudo
+        ssh_args=C.ANSIBLE_SSH_ARGS,        # ex: -o ForwardAgent=yes
         ):
 
         # used to lock multiprocess inputs and outputs at various levels
@@ -222,6 +223,7 @@ class Runner(object):
         self.no_log           = no_log
         self.run_once         = run_once
         self.sudo_exe         = sudo_exe
+        self.ssh_args         = ssh_args
 
         if self.transport == 'smart':
             # If the transport is 'smart', check to see if certain conditions
@@ -884,6 +886,7 @@ class Runner(object):
         actual_transport = inject.get('ansible_connection', self.transport)
         actual_private_key_file = inject.get('ansible_ssh_private_key_file', self.private_key_file)
         actual_private_key_file = template.template(self.basedir, actual_private_key_file, inject, fail_on_undefined=True)
+        actual_ssh_args = inject.get('ansible_ssh_args', self.ssh_args)
         self.sudo = utils.boolean(inject.get('ansible_sudo', self.sudo))
         self.sudo_user = inject.get('ansible_sudo_user', self.sudo_user)
         self.sudo_pass = inject.get('ansible_sudo_pass', self.sudo_pass)
@@ -952,7 +955,7 @@ class Runner(object):
             return ReturnData(host=host, comm_ok=False, result=result)
 
         try:
-            conn = self.connector.connect(actual_host, actual_port, actual_user, actual_pass, actual_transport, actual_private_key_file)
+            conn = self.connector.connect(actual_host, actual_port, actual_user, actual_pass, actual_transport, actual_private_key_file, actual_ssh_args)
             if self.delegate_to or host != actual_host:
                 conn.delegate = host
 

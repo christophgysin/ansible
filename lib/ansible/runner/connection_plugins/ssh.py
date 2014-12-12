@@ -37,7 +37,7 @@ from ansible import utils
 class Connection(object):
     ''' ssh based connections '''
 
-    def __init__(self, runner, host, port, user, password, private_key_file, *args, **kwargs):
+    def __init__(self, runner, host, port, user, password, private_key_file, ssh_args, *args, **kwargs):
         self.runner = runner
         self.host = host
         self.ipv6 = ':' in self.host
@@ -47,6 +47,7 @@ class Connection(object):
         self.private_key_file = private_key_file
         self.HASHED_KEY_MAGIC = "|1|"
         self.has_pipelining = True
+        self.ssh_args = ssh_args
 
         fcntl.lockf(self.runner.process_lockfile, fcntl.LOCK_EX)
         self.cp_dir = utils.prepare_writeable_dir('$HOME/.ansible/cp',mode=0700)
@@ -58,10 +59,10 @@ class Connection(object):
         vvv("ESTABLISH CONNECTION FOR USER: %s" % self.user, host=self.host)
 
         self.common_args = []
-        extra_args = C.ANSIBLE_SSH_ARGS
-        if extra_args is not None:
+
+        if self.ssh_args is not None:
             # make sure there is no empty string added as this can produce weird errors
-            self.common_args += [x.strip() for x in shlex.split(extra_args) if x.strip()]
+            self.common_args += [x.strip() for x in shlex.split(self.ssh_args) if x.strip()]
         else:
             self.common_args += ["-o", "ControlMaster=auto",
                                  "-o", "ControlPersist=60s",

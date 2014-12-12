@@ -213,6 +213,8 @@ mentioned::
       Connection type of the host. Candidates are local, ssh or paramiko.  The default is paramiko before Ansible 1.2, and 'smart' afterwards which detects whether usage of 'ssh' would be feasible based on whether ControlPersist is supported.
     ansible_ssh_private_key_file
       Private key file used by ssh.  Useful if using multiple keys and you don't want to use SSH agent.
+    ansible_ssh_args
+      Additional OpenSSH command-line args for more exotic usage (multiple bastion hosts, custom config files, etc).
     ansible_shell_type
       The shell type of the target system. By default commands are formatted using 'sh'-style syntax by default. Setting this to 'csh' or 'fish' will cause commands executed on target systems to follow those shell's syntax instead.
     ansible_python_interpreter
